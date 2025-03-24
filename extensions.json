@@ -1,0 +1,12 @@
+{
+  "extensions": [
+    {
+      "id": "ms-python.python",
+      "version": "latest"
+    },
+    {
+      "id": "ms-python.vscode-pylance",
+      "version": "latest"
+    }
+  ]
+}
