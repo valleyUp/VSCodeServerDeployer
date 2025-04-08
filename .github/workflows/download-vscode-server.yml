@@ -1,0 +1,39 @@
+name: Download VS Code Server
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # 每月1号运行
+  workflow_dispatch:     # 允许手动触发
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置工作目录
+        run: |
+          mkdir -p vscode-servers
+          chmod +x download_server.sh
+
+      - name: 获取最新 VS Code commit ID
+        id: get_commit
+        run: |
+          COMMIT_ID=$(curl -s https://update.code.visualstudio.com/api/commits/stable | jq -r '.commit')
+          echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
+
+      - name: 下载并打包 VS Code Server
+        run: |
+          ./download_server.sh -c ${{ steps.get_commit.outputs.commit_id }} -a ${{ matrix.arch }} -e
+
+      - name: 上传制品
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-server-${{ steps.get_commit.outputs.commit_id }}-${{ matrix.arch }}
+          path: vscode-server-${{ steps.get_commit.outputs.commit_id }}-${{ matrix.arch }}.tar.gz
+          retention-days: 30 
