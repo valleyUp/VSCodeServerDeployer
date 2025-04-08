@@ -75,6 +75,17 @@ if ! command -v jq >/dev/null 2>&1; then
     exit 1
 fi
 
+# 检查QEMU
+if [ "$arch" = "arm64" ]; then
+    if ! command -v qemu-aarch64-static >/dev/null 2>&1; then
+        echo "请安装 QEMU 用于模拟 arm64 环境:"
+        echo "Ubuntu/Debian: sudo apt-get install qemu-user-static"
+        echo "Arch Linux: sudo pacman -S qemu-user-static"
+        echo "CentOS/RHEL: sudo yum install qemu-user-static"
+        exit 1
+    fi
+fi
+
 # 设置 URL
 url_server="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode-server-linux-${arch}.tar.gz"
 url_cli="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode_cli_alpine_${arch}_cli.tar.gz"
@@ -147,6 +158,11 @@ chmod +x "${vscode_dir}/code-${commit_id}"
 
 # 扩展处理
 if [ "$download_extensions" = true ]; then
+    # 对于arm64架构，提示用户扩展需要在arm64机器上安装
+    if [ "$arch" = "arm64" ]; then
+        echo "警告: 当前在x86平台上运行，无法安装arm64架构的扩展。"
+    fi
+
     # 检查扩展文件是否存在，如果不存在，创建一个
     if [ ! -f "$extensions_file" ]; then
         echo "创建新的 extensions.json 文件..."
@@ -198,7 +214,6 @@ EOF
         current_dir=$(pwd)
         cd "${work_dir}/.vscode-server"
         
-        # 使用相对路径调用，并设置环境变量以隔离本机配置
         # 设置自定义用户数据和扩展目录，避免使用本机VS Code配置
         export VSCODE_CLI_DATA_DIR="./cli-data"
         export VSCODE_EXTENSIONS="./extensions" 
@@ -207,8 +222,18 @@ EOF
         # 创建临时目录
         mkdir -p "./cli-data" "./user-data"
         
-        # 使用相对路径调用，确保所有路径都在当前工作目录下
-        ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
+        # 对于arm64架构，使用QEMU运行
+        if [ "$arch" = "arm64" ]; then
+            # 复制QEMU到工作目录
+            cp $(which qemu-aarch64-static) ./
+            # 使用QEMU运行code二进制文件
+            ./qemu-aarch64-static ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
+            # 清理QEMU
+            rm ./qemu-aarch64-static
+        else
+            # 对于x64架构，直接运行
+            ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
+        fi
         
         # 清理临时目录
         rm -rf "./cli-data" "./user-data"
