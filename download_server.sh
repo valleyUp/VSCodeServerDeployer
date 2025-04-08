@@ -1,122 +1,155 @@
 #!/bin/bash
 
 # Script Description
-echo "This script automates the download of VS Code Server and its extensions for offline deployment."
+usage() {
+    echo "用法: $0 [选项]"
+    echo "选项:"
+    echo "  -c, --commit-id COMMIT_ID   VS Code commit ID (必需)"
+    echo "  -a, --arch ARCH             架构, 可选值: x64, arm64 (必需)"
+    echo "  -e, --extensions            下载扩展"
+    echo "  -f, --ext-file FILE         扩展配置文件路径，默认为 extensions.json"
+    echo "  -h, --help                  显示帮助信息"
+    exit 1
+}
 
-# Check if curl, tar, and jq are installed
+# 参数默认值
+commit_id=""
+arch=""
+download_extensions=false
+extensions_file="extensions.json"
+
+# 解析命令行参数
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+        -c|--commit-id)
+            commit_id="$2"
+            shift 2
+            ;;
+        -a|--arch)
+            if [[ "$2" == "x64" || "$2" == "arm64" ]]; then
+                arch="$2"
+            else
+                echo "错误: 架构必须是 x64 或 arm64"
+                usage
+            fi
+            shift 2
+            ;;
+        -e|--extensions)
+            download_extensions=true
+            shift
+            ;;
+        -f|--ext-file)
+            extensions_file="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            echo "未知选项: $1"
+            usage
+            ;;
+    esac
+done
+
+# 检查必需参数
+if [ -z "$commit_id" ]; then
+    echo "错误: 缺少 commit ID"
+    usage
+fi
+
+if [ -z "$arch" ]; then
+    echo "错误: 缺少架构"
+    usage
+fi
+
+# 检查依赖工具
 if ! command -v curl >/dev/null 2>&1 || ! command -v tar >/dev/null 2>&1; then
-    echo "Please install curl and tar."
+    echo "请安装 curl 和 tar"
     exit 1
 fi
 
 if ! command -v jq >/dev/null 2>&1; then
-    echo "Please install jq for JSON parsing."
+    echo "请安装 jq 用于 JSON 解析"
     exit 1
 fi
 
-# Get the VS Code commit_id
-echo "Please find the commit_id in your VS Code client (Help -> About), then enter the commit_id:"
-read -r commit_id
-if [ -z "$commit_id" ]; then
-    echo "commit_id cannot be empty."
-    exit 1
-fi
+# 设置 URL
+url_server="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode-server-linux-${arch}.tar.gz"
+url_cli="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode_cli_alpine_${arch}_cli.tar.gz"
 
-# Determine the architecture (x86 or arm)
-echo "Select server architecture:"
-echo "1) x86"
-echo "2) arm"
-read -r choice
-case $choice in
-    1)
-        arch="x64"
-        url_server="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode-server-linux-x64.tar.gz"
-        url_cli="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode_cli_alpine_x64_cli.tar.gz"
-        ;;
-    2)
-        arch="arm64"
-        url_server="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode-server-linux-arm64.tar.gz"
-        url_cli="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode_cli_alpine_arm64_cli.tar.gz"
-        ;;
-    *)
-        echo "Invalid choice, exiting script."
-        exit 1
-        ;;
-esac
-
-# Create necessary directories in current path
-work_dir="./vscode-server-${commit_id}-${arch}"
+# 创建架构特定目录
+base_dir="./vscode-servers/${arch}"
+work_dir="${base_dir}/${commit_id}"
 mkdir -p "${work_dir}"
-echo "Working directory: ${work_dir}"
+echo "工作目录: ${work_dir}"
 
-# Download files if they don't exist
+# 如果文件不存在则下载
 server_file="${work_dir}/vscode-server-linux-${arch}.tar.gz"
 if [ -f "${server_file}" ]; then
-    echo "Server package already exists, skipping download..."
+    echo "服务器包已存在，跳过下载..."
 else
-    echo "Downloading vscode-server-linux-${arch}.tar.gz ..."
+    echo "下载 vscode-server-linux-${arch}.tar.gz ..."
     curl -L -o "${server_file}" "${url_server}"
     if [ $? -ne 0 ]; then
-        echo "Failed to download vscode-server-linux-${arch}.tar.gz."
-        rm -rf "${work_dir}"
+        echo "下载 vscode-server-linux-${arch}.tar.gz 失败"
         exit 1
     fi
 fi
 
 cli_file="${work_dir}/vscode_cli_alpine_${arch}_cli.tar.gz"
 if [ -f "${cli_file}" ]; then
-    echo "CLI package already exists, skipping download..."
+    echo "CLI 包已存在，跳过下载..."
 else
-    echo "Downloading vscode_cli_alpine_${arch}_cli.tar.gz ..."
+    echo "下载 vscode_cli_alpine_${arch}_cli.tar.gz ..."
     curl -L -o "${cli_file}" "${url_cli}"
     if [ $? -ne 0 ]; then
-        echo "Failed to download vscode_cli_alpine_${arch}_cli.tar.gz."
-        rm -rf "${work_dir}"
+        echo "下载 vscode_cli_alpine_${arch}_cli.tar.gz 失败"
         exit 1
     fi
 fi
 
-# Extract files
-echo "Extracting vscode-server-linux-${arch}.tar.gz ..."
+# 解压文件
+echo "解压 vscode-server-linux-${arch}.tar.gz ..."
 tar -zxf "${server_file}" -C "${work_dir}"
 if [ $? -ne 0 ]; then
-    echo "Failed to extract vscode-server-linux-${arch}.tar.gz."
-    rm -rf "${work_dir}"
+    echo "解压 vscode-server-linux-${arch}.tar.gz 失败"
     exit 1
 fi
 
-echo "Extracting vscode_cli_alpine_${arch}_cli.tar.gz ..."
+echo "解压 vscode_cli_alpine_${arch}_cli.tar.gz ..."
 tar -zxf "${cli_file}" -C "${work_dir}"
 if [ $? -ne 0 ]; then
-    echo "Failed to extract vscode_cli_alpine_${arch}_cli.tar.gz."
-    rm -rf "${work_dir}"
+    echo "解压 vscode_cli_alpine_${arch}_cli.tar.gz 失败"
     exit 1
 fi
 
-# Organize directory structure
-echo "Organizing directory structure ..."
+# 组织目录结构
+echo "组织目录结构 ..."
 
-# Create .vscode-server directory
+# 创建 .vscode-server 目录
 vscode_dir="${work_dir}/.vscode-server"
 mkdir -p "${vscode_dir}/cli/servers/Stable-${commit_id}"
 mkdir -p "${vscode_dir}/extensions"
 
-# Move server folder
-mv "${work_dir}/vscode-server-linux-${arch}" "${vscode_dir}/cli/servers/Stable-${commit_id}/server"
+# 移动服务器文件夹，如果目标已存在先删除
+server_dest="${vscode_dir}/cli/servers/Stable-${commit_id}/server"
+if [ -d "$server_dest" ]; then
+    echo "目标服务器目录已存在，正在清除..."
+    rm -rf "$server_dest"
+fi
+mv "${work_dir}/vscode-server-linux-${arch}" "$server_dest"
 
-# Copy code file
-cp "${work_dir}/code" "${vscode_dir}/code-${commit_id}"
+# 移动 code 文件
+mv "${work_dir}/code" "${vscode_dir}/code-${commit_id}"
+chmod +x "${vscode_dir}/code-${commit_id}"
 
-# Extension handling
-echo "Do you want to download extensions? (y/n)"
-read -r download_extensions
-
-if [ "$download_extensions" = "y" ]; then
-    extensions_file="extensions.json"
-    
-    # Check if the extensions file exists, if not, create one
+# 扩展处理
+if [ "$download_extensions" = true ]; then
+    # 检查扩展文件是否存在，如果不存在，创建一个
     if [ ! -f "$extensions_file" ]; then
-        echo "Creating a new extensions.json file..."
+        echo "创建新的 extensions.json 文件..."
         cat > "$extensions_file" << EOF
 {
   "extensions": [
@@ -131,23 +164,19 @@ if [ "$download_extensions" = "y" ]; then
   ]
 }
 EOF
-        echo "Created extensions.json with sample extensions."
-        echo "Please edit this file to include your required extensions and run the script again."
-        echo "Format: { \"extensions\": [ { \"id\": \"publisher.extensionName\", \"version\": \"specific_version_or_latest\" } ] }"
-        rm -rf "${work_dir}"
+        echo "已创建包含示例扩展的 extensions.json"
+        echo "请编辑此文件以包含所需的扩展，然后重新运行脚本"
+        echo "格式: { \"extensions\": [ { \"id\": \"publisher.extensionName\", \"version\": \"specific_version_or_latest\" } ] }"
         exit 0
     fi
 
-    # Read from extensions file
-    echo "Reading extensions from $extensions_file ..."
+    # 从扩展文件读取
+    echo "从 $extensions_file 读取扩展..."
     
-    # Create extensions directory
+    # 创建扩展目录
     mkdir -p "${vscode_dir}/extensions"
     
-    # VS Code marketplace URL
-    marketplace_url="https://marketplace.visualstudio.com/_apis/public/gallery/publishers"
-    
-    # Download each extension
+    # 下载每个扩展
     jq -c '.extensions[]' "$extensions_file" | while read -r extension; do
         id=$(echo "$extension" | jq -r '.id')
         version=$(echo "$extension" | jq -r '.version')
@@ -155,56 +184,73 @@ EOF
         publisher=${id%%.*}
         name=${id#*.}
         
-        echo "Installing extension: $id (version: $version)"
+        echo "安装扩展: $id (版本: $version)"
         
-        # Determine correct version parameter
+        # 确定正确的版本参数
         if [ "$version" = "latest" ]; then
             version_param=""
         else
             version_param="@$version"
         fi
         
-        # Use the local code binary to install the extension
-        "${vscode_dir}/code-${commit_id}" --extensions-dir "${vscode_dir}/extensions" --install-extension "${id}${version_param}"
+        # 使用服务器代码二进制文件安装扩展
+        # 先进入vscode_dir目录，然后使用相对路径调用
+        current_dir=$(pwd)
+        cd "${work_dir}/.vscode-server"
+        
+        # 使用相对路径调用，并设置环境变量以隔离本机配置
+        # 设置自定义用户数据和扩展目录，避免使用本机VS Code配置
+        export VSCODE_CLI_DATA_DIR="./cli-data"
+        export VSCODE_EXTENSIONS="./extensions" 
+        export VSCODE_USER_DATA_DIR="./user-data"
+        
+        # 创建临时目录
+        mkdir -p "./cli-data" "./user-data"
+        
+        # 使用相对路径调用，确保所有路径都在当前工作目录下
+        ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
+        
+        # 清理临时目录
+        rm -rf "./cli-data" "./user-data"
+        
+        # 回到原来的目录
+        cd "$current_dir"
         
         if [ $? -ne 0 ]; then
-            echo "Failed to install extension $id. Skipping..."
+            echo "安装扩展 $id 失败。跳过..."
             continue
         fi
         
-        echo "Successfully installed $id"
+        echo "成功安装 $id"
     done
 fi
 
-# Set permissions
-echo "Setting permissions ..."
+# 设置权限
+echo "设置权限..."
 chmod -R 700 "${vscode_dir}"
 
-# Compress and package
-echo "Compressing and packaging .vscode-server directory ..."
-tar -czf "vscode-server-${commit_id}-${arch}.tar.gz" -C "${work_dir}" ".vscode-server"
+# 压缩和打包
+output_file="vscode-server-${commit_id}-${arch}.tar.gz"
+echo "压缩和打包 .vscode-server 目录到 ${output_file} ..."
+tar -czf "${output_file}" -C "${work_dir}" ".vscode-server"
 if [ $? -ne 0 ]; then
-    echo "Failed to compress and package."
-    rm -rf "${work_dir}"
+    echo "压缩和打包失败"
     exit 1
 fi
 
-# Clean up temporary directory
-rm -rf "${work_dir}"
+echo "脚本完成。打包文件是 ${output_file}"
 
-echo "Script completed. The packaged file is vscode-server-${commit_id}-${arch}.tar.gz"
-
-# Deployment instructions
+# 部署说明
 cat << EOF
 
-== Deployment Instructions ==
+== 部署说明 ==
 
-1. Transfer the vscode-server-${commit_id}-${arch}.tar.gz file to your offline server
-2. Extract it to the user's home directory:
-   tar -xzf vscode-server-${commit_id}-${arch}.tar.gz -C ~
+1. 将 ${output_file} 文件传输到您的离线服务器
+2. 将其解压到用户的主目录:
+   tar -xzf ${output_file} -C ~
 
-3. Connect to the server normally with VS Code Remote SSH
-   - The server binary will be found automatically
-   - The extensions will be available in the ~/.vscode-server/extensions directory
+3. 使用 VS Code Remote SSH 正常连接到服务器
+   - 服务器二进制文件将自动被找到
+   - 扩展将在 ~/.vscode-server/extensions 目录中可用
 
 EOF

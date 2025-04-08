@@ -1,11 +1,211 @@
 {
   "extensions": [
     {
-      "id": "ms-python.python",
+      "id": "gruntfuggly.todo-tree",
+      "version": "latest"
+    },
+    {
+      "id": "twxs.cmake",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.cpptools-themes",
+      "version": "latest"
+    },
+    {
+      "id": "ritwickdey.liveserver",
+      "version": "latest"
+    },
+    {
+      "id": "aaron-bond.better-comments",
+      "version": "latest"
+    },
+    {
+      "id": "ms-toolsai.vscode-jupyter-slideshow",
+      "version": "latest"
+    },
+    {
+      "id": "ms-toolsai.jupyter-keymap",
+      "version": "latest"
+    },
+    {
+      "id": "ms-toolsai.vscode-jupyter-cell-tags",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode-remote.remote-ssh-edit",
+      "version": "latest"
+    },
+    {
+      "id": "visualstudioexptteam.intellicode-api-usage-examples",
+      "version": "latest"
+    },
+    {
+      "id": "visualstudioexptteam.vscodeintellicode",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode-remote.vscode-remote-extensionpack",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode-remote.remote-wsl",
+      "version": "latest"
+    },
+    {
+      "id": "ms-azuretools.vscode-docker",
+      "version": "latest"
+    },
+    {
+      "id": "codezombiech.gitignore",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.cpptools-extension-pack",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.makefile-tools",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.cmake-tools",
+      "version": "latest"
+    },
+    {
+      "id": "kevinrose.vsc-python-indent",
+      "version": "latest"
+    },
+    {
+      "id": "redhat.vscode-yaml",
+      "version": "latest"
+    },
+    {
+      "id": "redhat.vscode-xml",
+      "version": "latest"
+    },
+    {
+      "id": "ms-python.autopep8",
+      "version": "latest"
+    },
+    {
+      "id": "ms-python.black-formatter",
+      "version": "latest"
+    },
+    {
+      "id": "yzhang.markdown-all-in-one",
+      "version": "latest"
+    },
+    {
+      "id": "vscode-icons-team.vscode-icons",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode-remote.remote-ssh",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode-remote.remote-containers",
+      "version": "latest"
+    },
+    {
+      "id": "mechatroner.rainbow-csv",
+      "version": "latest"
+    },
+    {
+      "id": "ms-python.isort",
+      "version": "latest"
+    },
+    {
+      "id": "github.copilot",
+      "version": "latest"
+    },
+    {
+      "id": "ms-python.debugpy",
+      "version": "latest"
+    },
+    {
+      "id": "ms-kubernetes-tools.vscode-kubernetes-tools",
+      "version": "latest"
+    },
+    {
+      "id": "mtxr.sqltools",
       "version": "latest"
     },
     {
       "id": "ms-python.vscode-pylance",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.cpptools",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.remote-explorer",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.remote-server",
+      "version": "latest"
+    },
+    {
+      "id": "ms-toolsai.jupyter-renderers",
+      "version": "latest"
+    },
+    {
+      "id": "ms-python.python",
+      "version": "latest"
+    },
+    {
+      "id": "jock.svg",
+      "version": "latest"
+    },
+    {
+      "id": "ms-toolsai.jupyter",
+      "version": "latest"
+    },
+    {
+      "id": "eamodio.gitlens",
+      "version": "latest"
+    },
+    {
+      "id": "github.copilot-chat",
+      "version": "latest"
+    },
+    {
+      "id": "mtxr.sqltools-driver-mysql",
+      "version": "latest"
+    },
+    {
+      "id": "esbenp.prettier-vscode",
+      "version": "latest"
+    },
+    {
+      "id": "christian-kohler.path-intellisense",
+      "version": "latest"
+    },
+    {
+      "id": "jeff-hykin.better-cpp-syntax",
+      "version": "latest"
+    },
+    {
+      "id": "ms-vscode.powershell",
+      "version": "latest"
+    },
+    {
+      "id": "cschlosser.doxdocgen",
+      "version": "latest"
+    },
+    {
+      "id": "dotjoshjohnson.xml",
+      "version": "latest"
+    },
+    {
+      "id": "continue.continue",
+      "version": "latest"
+    },
+    {
+      "id": "wayou.vscode-todo-highlight",
       "version": "latest"
     }
   ]
