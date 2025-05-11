@@ -207,6 +207,14 @@
     {
       "id": "wayou.vscode-todo-highlight",
       "version": "latest"
+    },
+    {
+      "id": "james-yu.latex-workshop",
+      "version": "latest"
+    },
+    {
+      "id": "tecosaur.latex-utilities",
+      "version": "latest"
     }
   ]
 }
