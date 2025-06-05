@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script Description
+# Display usage information
 usage() {
     echo "用法: $0 [选项]"
     echo "选项:"
@@ -12,13 +12,13 @@ usage() {
     exit 1
 }
 
-# 参数默认值
+# Default values for parameters
 commit_id=""
 arch=""
 download_extensions=false
 extensions_file="extensions.json"
 
-# 解析命令行参数
+# Parse command line arguments
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
@@ -53,7 +53,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# 检查必需参数
+# Verify required parameters
 if [ -z "$commit_id" ]; then
     echo "错误: 缺少 commit ID"
     usage
@@ -64,7 +64,7 @@ if [ -z "$arch" ]; then
     usage
 fi
 
-# 检查依赖工具
+# Check required tools
 if ! command -v curl >/dev/null 2>&1 || ! command -v tar >/dev/null 2>&1; then
     echo "请安装 curl 和 tar"
     exit 1
@@ -75,7 +75,7 @@ if ! command -v jq >/dev/null 2>&1; then
     exit 1
 fi
 
-# 检查QEMU
+# Check QEMU availability
 if [ "$arch" = "arm64" ]; then
     if ! command -v qemu-aarch64-static >/dev/null 2>&1; then
         echo "请安装 QEMU 用于模拟 arm64 环境:"
@@ -86,17 +86,17 @@ if [ "$arch" = "arm64" ]; then
     fi
 fi
 
-# 设置 URL
+# Set download URLs
 url_server="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode-server-linux-${arch}.tar.gz"
 url_cli="https://vscode.download.prss.microsoft.com/dbazure/download/stable/${commit_id}/vscode_cli_alpine_${arch}_cli.tar.gz"
 
-# 创建架构特定目录
+# Create architecture specific directory
 base_dir="./vscode-servers/${arch}"
 work_dir="${base_dir}/${commit_id}"
 mkdir -p "${work_dir}"
 echo "工作目录: ${work_dir}"
 
-# 如果文件不存在则下载
+# Download files if missing
 server_file="${work_dir}/vscode-server-linux-${arch}.tar.gz"
 if [ -f "${server_file}" ]; then
     echo "服务器包已存在，跳过下载..."
@@ -121,7 +121,7 @@ else
     fi
 fi
 
-# 解压文件
+# Extract files
 echo "解压 vscode-server-linux-${arch}.tar.gz ..."
 tar -zxf "${server_file}" -C "${work_dir}"
 if [ $? -ne 0 ]; then
@@ -136,15 +136,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 组织目录结构
+# Arrange directory structure
 echo "组织目录结构 ..."
 
-# 创建 .vscode-server 目录
+# Create .vscode-server directory
 vscode_dir="${work_dir}/.vscode-server"
 mkdir -p "${vscode_dir}/cli/servers/Stable-${commit_id}"
 mkdir -p "${vscode_dir}/extensions"
 
-# 移动服务器文件夹，如果目标已存在先删除
+# Move server folder, removing existing target first
 server_dest="${vscode_dir}/cli/servers/Stable-${commit_id}/server"
 if [ -d "$server_dest" ]; then
     echo "目标服务器目录已存在，正在清除..."
@@ -152,18 +152,18 @@ if [ -d "$server_dest" ]; then
 fi
 mv "${work_dir}/vscode-server-linux-${arch}" "$server_dest"
 
-# 移动 code 文件
+# Move the code binary
 mv "${work_dir}/code" "${vscode_dir}/code-${commit_id}"
 chmod +x "${vscode_dir}/code-${commit_id}"
 
-# 扩展处理
+# Extension handling
 if [ "$download_extensions" = true ]; then
-    # 对于arm64架构，提示用户扩展需要在arm64机器上安装
+    # Warn when running arm64 extensions on x86
     if [ "$arch" = "arm64" ]; then
         echo "警告: 当前在x86平台上运行，无法安装arm64架构的扩展。"
     fi
 
-    # 检查扩展文件是否存在，如果不存在，创建一个
+    # Create a template extension list if none exists
     if [ ! -f "$extensions_file" ]; then
         echo "创建新的 extensions.json 文件..."
         cat > "$extensions_file" << EOF
@@ -186,13 +186,13 @@ EOF
         exit 0
     fi
 
-    # 从扩展文件读取
+    # Read extensions from file
     echo "从 $extensions_file 读取扩展..."
     
-    # 创建扩展目录
+    # Create extension directory
     mkdir -p "${vscode_dir}/extensions"
     
-    # 下载每个扩展
+    # Download each extension
     jq -c '.extensions[]' "$extensions_file" | while read -r extension; do
         id=$(echo "$extension" | jq -r '.id')
         version=$(echo "$extension" | jq -r '.version')
@@ -209,36 +209,36 @@ EOF
             version_param="@$version"
         fi
         
-        # 使用服务器代码二进制文件安装扩展
-        # 先进入vscode_dir目录，然后使用相对路径调用
+        # Install extension using the server binary
+        # Enter vscode_dir first and call with relative path
         current_dir=$(pwd)
         cd "${work_dir}/.vscode-server"
         
-        # 设置自定义用户数据和扩展目录，避免使用本机VS Code配置
+        # Use custom data paths to avoid host VS Code config
         export VSCODE_CLI_DATA_DIR="./cli-data"
         export VSCODE_EXTENSIONS="./extensions" 
         export VSCODE_USER_DATA_DIR="./user-data"
         
-        # 创建临时目录
+        # Create temporary directories
         mkdir -p "./cli-data" "./user-data"
         
-        # 对于arm64架构，使用QEMU运行
+        # Run under QEMU when targeting arm64
         if [ "$arch" = "arm64" ]; then
-            # 复制QEMU到工作目录
+            # Copy QEMU binary into working directory
             cp $(which qemu-aarch64-static) ./
-            # 使用QEMU运行code二进制文件
+            # Execute code binary via QEMU
             ./qemu-aarch64-static ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
-            # 清理QEMU
+            # Clean up QEMU binary
             rm ./qemu-aarch64-static
         else
-            # 对于x64架构，直接运行
+            # Run directly on x64
             ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
         fi
         
-        # 清理临时目录
+        # Clean temporary directories
         rm -rf "./cli-data" "./user-data"
         
-        # 回到原来的目录
+        # Return to original directory
         cd "$current_dir"
         
         if [ $? -ne 0 ]; then
@@ -250,11 +250,11 @@ EOF
     done
 fi
 
-# 设置权限
+# Set permissions
 echo "设置权限..."
 chmod -R 700 "${vscode_dir}"
 
-# 压缩和打包
+# Compress and package
 output_file="vscode-server-${commit_id}-${arch}.tar.gz"
 echo "压缩和打包 .vscode-server 目录到 ${output_file} ..."
 tar -czf "${output_file}" -C "${work_dir}" ".vscode-server"
@@ -265,7 +265,7 @@ fi
 
 echo "脚本完成。打包文件是 ${output_file}"
 
-# 部署说明
+# Deployment instructions
 cat << EOF
 
 == 部署说明 ==
