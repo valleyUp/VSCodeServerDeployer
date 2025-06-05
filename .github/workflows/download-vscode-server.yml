@@ -10,12 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       commit_id: ${{ steps.get_commit.outputs.commit_id }}
+      commit_short: ${{ steps.get_commit.outputs.commit_short }}
     steps:
       - name: 获取最新 VS Code commit ID
         id: get_commit
         run: |
           COMMIT_ID=$(curl -s https://update.code.visualstudio.com/api/update/linux-x64/stable/latest | jq -r '.version')
+          COMMIT_SHORT=${COMMIT_ID:0:7}
           echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
+          echo "commit_short=$COMMIT_SHORT" >> $GITHUB_OUTPUT
 
   build:
     needs: prepare
@@ -67,8 +70,8 @@ jobs:
       - name: 发布 Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.prepare.outputs.commit_id }}
-          name: ${{ needs.prepare.outputs.commit_id }}
+          tag_name: vscode-server-${{ needs.prepare.outputs.commit_short }}
+          name: vscode-server-${{ needs.prepare.outputs.commit_id }}
           files: |
             artifacts/vscode-server-${{ needs.prepare.outputs.commit_id }}-x64.tar.gz
             artifacts/vscode-server-${{ needs.prepare.outputs.commit_id }}-arm64.tar.gz
