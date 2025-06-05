@@ -6,34 +6,69 @@ on:
   workflow_dispatch:     # 允许手动触发
 
 jobs:
-  download:
+  prepare:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [x64, arm64]
-    
+    outputs:
+      commit_id: ${{ steps.get_commit.outputs.commit_id }}
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-
-      - name: 设置工作目录
-        run: |
-          mkdir -p vscode-servers
-          chmod +x download_server.sh
-
       - name: 获取最新 VS Code commit ID
         id: get_commit
         run: |
           COMMIT_ID=$(curl -s https://update.code.visualstudio.com/api/update/linux-x64/stable/latest | jq -r '.version')
           echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
 
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 QEMU (仅 arm64)
+        if: matrix.arch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
+      - name: 设置工作目录
+        run: |
+          mkdir -p vscode-servers
+          chmod +x download_server.sh
+
       - name: 下载并打包 VS Code Server
         run: |
-          ./download_server.sh -c ${{ steps.get_commit.outputs.commit_id }} -a ${{ matrix.arch }} -e
+          ./download_server.sh -c ${{ needs.prepare.outputs.commit_id }} -a ${{ matrix.arch }} -e
 
       - name: 上传制品
         uses: actions/upload-artifact@v4
         with:
-          name: vscode-server-${{ steps.get_commit.outputs.commit_id }}-${{ matrix.arch }}
-          path: vscode-server-${{ steps.get_commit.outputs.commit_id }}-${{ matrix.arch }}.tar.gz
-          retention-days: 30 
+          name: vscode-server-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}
+          path: vscode-server-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.gz
+          retention-days: 30
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vscode-server-${{ needs.prepare.outputs.commit_id }}-x64
+          path: ./artifacts
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: vscode-server-${{ needs.prepare.outputs.commit_id }}-arm64
+          path: ./artifacts
+
+      - name: 发布 Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.prepare.outputs.commit_id }}
+          name: ${{ needs.prepare.outputs.commit_id }}
+          files: |
+            artifacts/vscode-server-${{ needs.prepare.outputs.commit_id }}-x64.tar.gz
+            artifacts/vscode-server-${{ needs.prepare.outputs.commit_id }}-arm64.tar.gz
