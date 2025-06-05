@@ -24,7 +24,7 @@ jobs:
       - name: 获取最新 VS Code commit ID
         id: get_commit
         run: |
-          COMMIT_ID=$(curl -s https://update.code.visualstudio.com/api/commits/stable | jq -r '.commit')
+          COMMIT_ID=$(curl -s https://update.code.visualstudio.com/api/update/linux-x64/stable/latest | jq -r '.version')
           echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
 
       - name: 下载并打包 VS Code Server
