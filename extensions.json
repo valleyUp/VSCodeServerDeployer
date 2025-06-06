@@ -205,6 +205,10 @@
       "version": "latest"
     },
     {
+      "id": "rooveterinaryinc.roo-cline",
+      "version": "latest"
+    },
+    {
       "id": "wayou.vscode-todo-highlight",
       "version": "latest"
     },
@@ -214,6 +218,50 @@
     },
     {
       "id": "tecosaur.latex-utilities",
+      "version": "latest"
+    },
+    {
+      "id": "augment.vscode-augment",
+      "version": "latest"
+    },
+    {
+      "id": "bierner.markdown-checkbox",
+      "version": "latest"
+    },
+    {
+      "id": "bierner.markdown-emoji",
+      "version": "latest"
+    },
+    {
+      "id": "bierner.markdown-mermaid",
+      "version": "latest"
+    },
+    {
+      "id": "bierner.markdown-preview-github-styles",
+      "version": "latest"
+    },
+    {
+      "id": "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+      "version": "latest"
+    },
+    {
+      "id": "charliermarsh.ruff",
+      "version": "latest"
+    },
+    {
+      "id": "docker.docker",
+      "version": "latest"
+    },
+    {
+      "id": "ms-azuretools.vscode-containers",
+      "version": "latest"
+    },
+    {
+      "id": "shd101wyy.markdown-preview-enhanced",
+      "version": "latest"
+    },
+    {
+      "id": "yzane.markdown-pdf",
       "version": "latest"
     }
   ]
