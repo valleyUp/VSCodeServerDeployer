@@ -17,6 +17,7 @@ commit_id=""
 arch=""
 download_extensions=false
 extensions_file="extensions.json"
+ext_cache_dir="${EXT_CACHE_DIR:-}"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -156,7 +157,7 @@ mv "${work_dir}/vscode-server-linux-${arch}" "$server_dest"
 mv "${work_dir}/code" "${vscode_dir}/code-${commit_id}"
 chmod +x "${vscode_dir}/code-${commit_id}"
 
-# Extension handling (use server-side official CLI: code-server --start-server)
+# Extension handling (use server-side official CLI: code-server --install-extension)
 if [ "$download_extensions" = true ]; then
     echo "启用扩展下载并使用官方 CLI 安装"
 
@@ -226,6 +227,7 @@ EOF
             echo "成功安装 $id"
         fi
     done
+
 fi
 
 # Set permissions
@@ -233,15 +235,31 @@ echo "设置权限..."
 chmod -R 700 "${vscode_dir}"
 
 # Compress and package
-output_file="vscode-server-${commit_id}-${arch}.tar.gz"
-echo "压缩和打包 .vscode-server 目录到 ${output_file} ..."
-tar -czf "${output_file}" -C "${work_dir}" ".vscode-server"
+core_output_file="vscode-server-core-${commit_id}-${arch}.tar.xz"
+echo "压缩仅包含 server/cli 的 core 包到 ${core_output_file} ..."
+XZ_OPT="-T0 -9e" tar -cJf "${core_output_file}" --exclude=".vscode-server/extensions/*" -C "${work_dir}" ".vscode-server"
 if [ $? -ne 0 ]; then
-    echo "压缩和打包失败"
+    echo "压缩 core 包失败"
     exit 1
 fi
 
-echo "脚本完成。打包文件是 ${output_file}"
+if [ "$download_extensions" = true ]; then
+    ext_output_file="vscode-server-extensions-${commit_id}-${arch}.tar.xz"
+    echo "压缩仅包含扩展的扩展包到 ${ext_output_file} ..."
+    XZ_OPT="-T0 -9e" tar -cJf "${ext_output_file}" -C "${vscode_dir}" "extensions"
+    if [ $? -ne 0 ]; then
+        echo "压缩扩展包失败"
+        exit 1
+    fi
+fi
+
+echo "脚本完成。输出:"
+echo " - core 包: ${core_output_file}"
+if [ "$download_extensions" = true ]; then
+    echo " - 扩展包: ${ext_output_file} (仅包含 ~/.vscode-server/extensions)"
+else
+    echo " - 未指定 -e，未生成扩展包"
+fi
 
 # Deployment instructions
 cat << EOF
@@ -254,6 +272,6 @@ cat << EOF
 
 3. 使用 VS Code Remote SSH 正常连接到服务器
    - 服务器二进制文件将自动被找到
-   - 若使用 -e 选项，扩展已通过官方 CLI 预装在 ~/.vscode-server/extensions；否则在联网环境下自行安装或通过 VS Code 同步
+   - 若使用 -e 选项，可选择解压扩展包（vscode-server-extensions-*.tar.gz）覆盖 ~/.vscode-server/extensions；若只升级 server 可使用 core 包
 
 EOF

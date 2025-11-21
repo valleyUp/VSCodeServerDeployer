@@ -37,6 +37,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-user-static
 
+      - name: 安装 xz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xz-utils
+
       - name: 设置工作目录
         run: |
           mkdir -p vscode-servers
@@ -46,11 +51,18 @@ jobs:
         run: |
           ./download_server.sh -c ${{ needs.prepare.outputs.commit_id }} -a ${{ matrix.arch }} -e
 
-      - name: 上传制品
+      - name: 上传 core 制品（仅 server/cli）
         uses: actions/upload-artifact@v4
         with:
-          name: vscode-server-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}
-          path: vscode-server-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.gz
+          name: vscode-server-core-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}
+          path: vscode-server-core-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.xz
+          retention-days: 30
+
+      - name: 上传 extensions 制品（仅扩展）
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}
+          path: vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.xz
           retention-days: 30
 
   release:
@@ -59,12 +71,22 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: vscode-server-${{ needs.prepare.outputs.commit_id }}-x64
+          name: vscode-server-core-${{ needs.prepare.outputs.commit_id }}-x64
           path: ./artifacts
 
       - uses: actions/download-artifact@v4
         with:
-          name: vscode-server-${{ needs.prepare.outputs.commit_id }}-arm64
+          name: vscode-server-core-${{ needs.prepare.outputs.commit_id }}-arm64
+          path: ./artifacts
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-x64
+          path: ./artifacts
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-arm64
           path: ./artifacts
 
       - name: 发布 Release
@@ -73,5 +95,7 @@ jobs:
           tag_name: vscode-server-${{ needs.prepare.outputs.commit_short }}
           name: vscode-server-${{ needs.prepare.outputs.commit_id }}
           files: |
-            artifacts/vscode-server-${{ needs.prepare.outputs.commit_id }}-x64.tar.gz
-            artifacts/vscode-server-${{ needs.prepare.outputs.commit_id }}-arm64.tar.gz
+            artifacts/vscode-server-core-${{ needs.prepare.outputs.commit_id }}-x64.tar.xz
+            artifacts/vscode-server-core-${{ needs.prepare.outputs.commit_id }}-arm64.tar.xz
+            artifacts/vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-x64.tar.xz
+            artifacts/vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-arm64.tar.xz
