@@ -6,7 +6,7 @@ usage() {
     echo "选项:"
     echo "  -c, --commit-id COMMIT_ID   VS Code commit ID (必需)"
     echo "  -a, --arch ARCH             架构, 可选值: x64, arm64 (必需)"
-    echo "  -e, --extensions            下载扩展"
+    echo "  -e, --extensions            使用官方 CLI 下载并预装扩展"
     echo "  -f, --ext-file FILE         扩展配置文件路径，默认为 extensions.json"
     echo "  -h, --help                  显示帮助信息"
     exit 1
@@ -75,8 +75,8 @@ if ! command -v jq >/dev/null 2>&1; then
     exit 1
 fi
 
-# Check QEMU availability
-if [ "$arch" = "arm64" ]; then
+# Check QEMU availability when cross-building arm64 on x64
+if [ "$arch" = "arm64" ] && [ "$(uname -m)" != "aarch64" ]; then
     if ! command -v qemu-aarch64-static >/dev/null 2>&1; then
         echo "请安装 QEMU 用于模拟 arm64 环境:"
         echo "Ubuntu/Debian: sudo apt-get install qemu-user-static"
@@ -156,12 +156,9 @@ mv "${work_dir}/vscode-server-linux-${arch}" "$server_dest"
 mv "${work_dir}/code" "${vscode_dir}/code-${commit_id}"
 chmod +x "${vscode_dir}/code-${commit_id}"
 
-# Extension handling
+# Extension handling (use server-side official CLI: code-server --start-server)
 if [ "$download_extensions" = true ]; then
-    # Warn when running arm64 extensions on x86
-    if [ "$arch" = "arm64" ]; then
-        echo "警告: 当前在x86平台上运行，无法安装arm64架构的扩展。"
-    fi
+    echo "启用扩展下载并使用官方 CLI 安装"
 
     # Create a template extension list if none exists
     if [ ! -f "$extensions_file" ]; then
@@ -186,67 +183,48 @@ EOF
         exit 0
     fi
 
-    # Read extensions from file
-    echo "从 $extensions_file 读取扩展..."
-    
-    # Create extension directory
-    mkdir -p "${vscode_dir}/extensions"
-    
-    # Download each extension
+    extensions_dir="${vscode_dir}/extensions"
+    user_data_dir="${vscode_dir}/user-data"
+    server_data_dir="${vscode_dir}/server-data"
+    mkdir -p "$extensions_dir" "$user_data_dir" "$server_data_dir"
+
+    server_bin="${server_dest}/bin/code-server"
+    runner_prefix=()
+    if [ "$arch" = "arm64" ] && [ "$(uname -m)" != "aarch64" ]; then
+        runner_prefix=("$(which qemu-aarch64-static)")
+    fi
+
     jq -c '.extensions[]' "$extensions_file" | while read -r extension; do
         id=$(echo "$extension" | jq -r '.id')
         version=$(echo "$extension" | jq -r '.version')
-        
-        publisher=${id%%.*}
-        name=${id#*.}
-        
-        echo "安装扩展: $id (版本: $version)"
-        
-        # 确定正确的版本参数
-        if [ "$version" = "latest" ]; then
-            version_param=""
-        else
-            version_param="@$version"
-        fi
-        
-        # Install extension using the server binary
-        # Enter vscode_dir first and call with relative path
-        current_dir=$(pwd)
-        cd "${work_dir}/.vscode-server"
-        
-        # Use custom data paths to avoid host VS Code config
-        export VSCODE_CLI_DATA_DIR="./cli-data"
-        export VSCODE_EXTENSIONS="./extensions" 
-        export VSCODE_USER_DATA_DIR="./user-data"
-        
-        # Create temporary directories
-        mkdir -p "./cli-data" "./user-data"
-        
-        # Run under QEMU when targeting arm64
-        if [ "$arch" = "arm64" ]; then
-            # Copy QEMU binary into working directory
-            cp $(which qemu-aarch64-static) ./
-            # Execute code binary via QEMU
-            ./qemu-aarch64-static ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
-            # Clean up QEMU binary
-            rm ./qemu-aarch64-static
-        else
-            # Run directly on x64
-            ./code-${commit_id} ext --extensions-dir "./extensions" --user-data-dir "./user-data" install --cli-data-dir "./cli/servers/Stable-${commit_id}/server" --force "${id}${version_param}"
-        fi
-        
-        # Clean temporary directories
-        rm -rf "./cli-data" "./user-data"
-        
-        # Return to original directory
-        cd "$current_dir"
-        
-        if [ $? -ne 0 ]; then
-            echo "安装扩展 $id 失败。跳过..."
+
+        if [ -z "$id" ] || [ "$id" = "null" ]; then
+            echo "跳过无效扩展项: $extension"
             continue
         fi
-        
-        echo "成功安装 $id"
+
+        version_param=""
+        if [ -n "$version" ] && [ "$version" != "latest" ]; then
+            version_param="@${version}"
+        fi
+
+        echo "安装扩展: ${id}${version_param} (使用 code-server 官方方式，无需持久启动 server)"
+
+        "${runner_prefix[@]}" "$server_bin" \
+            --accept-server-license-terms \
+            --extensions-dir "$extensions_dir" \
+            --user-data-dir "$user_data_dir" \
+            --server-data-dir "$server_data_dir" \
+            --telemetry-level off \
+            --install-extension "${id}${version_param}" \
+            --force
+
+        status=$?
+        if [ $status -ne 0 ]; then
+            echo "安装扩展 $id 失败，继续下一项... (exit $status)"
+        else
+            echo "成功安装 $id"
+        fi
     done
 fi
 
@@ -276,6 +254,6 @@ cat << EOF
 
 3. 使用 VS Code Remote SSH 正常连接到服务器
    - 服务器二进制文件将自动被找到
-   - 扩展将在 ~/.vscode-server/extensions 目录中可用
+   - 若使用 -e 选项，扩展已通过官方 CLI 预装在 ~/.vscode-server/extensions；否则在联网环境下自行安装或通过 VS Code 同步
 
 EOF
