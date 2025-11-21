@@ -144,6 +144,8 @@ echo "组织目录结构 ..."
 vscode_dir="${work_dir}/.vscode-server"
 mkdir -p "${vscode_dir}/cli/servers/Stable-${commit_id}"
 mkdir -p "${vscode_dir}/extensions"
+data_dir="${vscode_dir}"
+mkdir -p "${data_dir}"
 
 # Move server folder, removing existing target first
 server_dest="${vscode_dir}/cli/servers/Stable-${commit_id}/server"
@@ -185,9 +187,7 @@ EOF
     fi
 
     extensions_dir="${vscode_dir}/extensions"
-    user_data_dir="${vscode_dir}/user-data"
-    server_data_dir="${vscode_dir}/server-data"
-    mkdir -p "$extensions_dir" "$user_data_dir" "$server_data_dir"
+    mkdir -p "$extensions_dir" "$data_dir"
 
     server_bin="${server_dest}/bin/code-server"
     runner_prefix=()
@@ -214,8 +214,8 @@ EOF
         "${runner_prefix[@]}" "$server_bin" \
             --accept-server-license-terms \
             --extensions-dir "$extensions_dir" \
-            --user-data-dir "$user_data_dir" \
-            --server-data-dir "$server_data_dir" \
+            --user-data-dir "$data_dir" \
+            --server-data-dir "$data_dir" \
             --telemetry-level off \
             --install-extension "${id}${version_param}" \
             --force
@@ -235,18 +235,20 @@ echo "设置权限..."
 chmod -R 700 "${vscode_dir}"
 
 # Compress and package
-core_output_file="vscode-server-core-${commit_id}-${arch}.tar.xz"
+core_output_file="vscode-server-core-${commit_id}-${arch}.tar.zst"
 echo "压缩仅包含 server/cli 的 core 包到 ${core_output_file} ..."
-XZ_OPT="-T0 -9e" tar -cJf "${core_output_file}" --exclude=".vscode-server/extensions/*" -C "${work_dir}" ".vscode-server"
+tar -I "zstd -T0 -19" -cf "${core_output_file}" -C "${work_dir}" \
+    ".vscode-server/code-${commit_id}" \
+    ".vscode-server/cli"
 if [ $? -ne 0 ]; then
     echo "压缩 core 包失败"
     exit 1
 fi
 
 if [ "$download_extensions" = true ]; then
-    ext_output_file="vscode-server-extensions-${commit_id}-${arch}.tar.xz"
+    ext_output_file="vscode-server-extensions-${commit_id}-${arch}.tar.zst"
     echo "压缩仅包含扩展的扩展包到 ${ext_output_file} ..."
-    XZ_OPT="-T0 -9e" tar -cJf "${ext_output_file}" -C "${vscode_dir}" "extensions"
+    tar -I "zstd -T0 -19" -cf "${ext_output_file}" -C "${vscode_dir}" "extensions" "data"
     if [ $? -ne 0 ]; then
         echo "压缩扩展包失败"
         exit 1
@@ -272,6 +274,6 @@ cat << EOF
 
 3. 使用 VS Code Remote SSH 正常连接到服务器
    - 服务器二进制文件将自动被找到
-   - 若使用 -e 选项，可选择解压扩展包（vscode-server-extensions-*.tar.gz）覆盖 ~/.vscode-server/extensions；若只升级 server 可使用 core 包
+   - 若使用 -e 选项，可选择解压扩展包（vscode-server-extensions-*.tar.zst）覆盖 ~/.vscode-server/extensions 和 ~/.vscode-server/data；若只升级 server 可使用 core 包
 
 EOF

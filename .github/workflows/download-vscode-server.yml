@@ -22,25 +22,23 @@ jobs:
 
   build:
     needs: prepare
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [x64, arm64]
+        include:
+          - arch: x64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 安装 QEMU (仅 arm64)
-        if: matrix.arch == 'arm64'
+      - name: 安装 zstd
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-user-static
-
-      - name: 安装 xz
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xz-utils
+          sudo apt-get install -y zstd
 
       - name: 设置工作目录
         run: |
@@ -55,14 +53,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vscode-server-core-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}
-          path: vscode-server-core-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.xz
+          path: vscode-server-core-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.zst
           retention-days: 30
 
       - name: 上传 extensions 制品（仅扩展）
         uses: actions/upload-artifact@v4
         with:
           name: vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}
-          path: vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.xz
+          path: vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-${{ matrix.arch }}.tar.zst
           retention-days: 30
 
   release:
@@ -95,7 +93,7 @@ jobs:
           tag_name: vscode-server-${{ needs.prepare.outputs.commit_short }}
           name: vscode-server-${{ needs.prepare.outputs.commit_id }}
           files: |
-            artifacts/vscode-server-core-${{ needs.prepare.outputs.commit_id }}-x64.tar.xz
-            artifacts/vscode-server-core-${{ needs.prepare.outputs.commit_id }}-arm64.tar.xz
-            artifacts/vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-x64.tar.xz
-            artifacts/vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-arm64.tar.xz
+            artifacts/vscode-server-core-${{ needs.prepare.outputs.commit_id }}-x64.tar.zst
+            artifacts/vscode-server-core-${{ needs.prepare.outputs.commit_id }}-arm64.tar.zst
+            artifacts/vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-x64.tar.zst
+            artifacts/vscode-server-extensions-${{ needs.prepare.outputs.commit_id }}-arm64.tar.zst
