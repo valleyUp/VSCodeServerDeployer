@@ -1,268 +1,364 @@
 {
   "extensions": [
     {
-      "id": "gruntfuggly.todo-tree",
-      "version": "latest"
+      "version": "latest",
+      "id": "aaron-bond.better-comments"
     },
     {
-      "id": "twxs.cmake",
-      "version": "latest"
+      "version": "latest",
+      "id": "alexcvzz.vscode-sqlite"
     },
     {
-      "id": "ms-vscode.cpptools-themes",
-      "version": "latest"
+      "version": "latest",
+      "id": "anthropic.claude-code"
     },
     {
-      "id": "ritwickdey.liveserver",
-      "version": "latest"
+      "version": "latest",
+      "id": "bierner.markdown-checkbox"
     },
     {
-      "id": "aaron-bond.better-comments",
-      "version": "latest"
+      "version": "latest",
+      "id": "bierner.markdown-emoji"
     },
     {
-      "id": "ms-toolsai.vscode-jupyter-slideshow",
-      "version": "latest"
+      "version": "latest",
+      "id": "bierner.markdown-footnotes"
     },
     {
-      "id": "ms-toolsai.jupyter-keymap",
-      "version": "latest"
+      "version": "latest",
+      "id": "bierner.markdown-mermaid"
     },
     {
-      "id": "ms-toolsai.vscode-jupyter-cell-tags",
-      "version": "latest"
+      "version": "latest",
+      "id": "bierner.markdown-preview-github-styles"
     },
     {
-      "id": "ms-vscode-remote.remote-ssh-edit",
-      "version": "latest"
+      "version": "latest",
+      "id": "bpruitt-goddard.mermaid-markdown-syntax-highlighting"
     },
     {
-      "id": "visualstudioexptteam.intellicode-api-usage-examples",
-      "version": "latest"
+      "version": "latest",
+      "id": "charliermarsh.ruff"
     },
     {
-      "id": "visualstudioexptteam.vscodeintellicode",
-      "version": "latest"
+      "version": "latest",
+      "id": "christian-kohler.path-intellisense"
     },
     {
-      "id": "ms-vscode-remote.vscode-remote-extensionpack",
-      "version": "latest"
+      "version": "latest",
+      "id": "codezombiech.gitignore"
     },
     {
-      "id": "ms-vscode-remote.remote-wsl",
-      "version": "latest"
+      "version": "latest",
+      "id": "cschlosser.doxdocgen"
     },
     {
-      "id": "ms-azuretools.vscode-docker",
-      "version": "latest"
+      "version": "latest",
+      "id": "docker.docker"
     },
     {
-      "id": "codezombiech.gitignore",
-      "version": "latest"
+      "version": "latest",
+      "id": "donjayamanne.githistory"
     },
     {
-      "id": "ms-vscode.cpptools-extension-pack",
-      "version": "latest"
+      "version": "latest",
+      "id": "dotjoshjohnson.xml"
     },
     {
-      "id": "ms-vscode.makefile-tools",
-      "version": "latest"
+      "version": "latest",
+      "id": "eamodio.gitlens"
     },
     {
-      "id": "ms-vscode.cmake-tools",
-      "version": "latest"
+      "version": "latest",
+      "id": "esbenp.prettier-vscode"
     },
     {
-      "id": "kevinrose.vsc-python-indent",
-      "version": "latest"
+      "version": "latest",
+      "id": "formulahendry.vscode-mysql"
     },
     {
-      "id": "redhat.vscode-yaml",
-      "version": "latest"
+      "version": "latest",
+      "id": "github.copilot-chat"
     },
     {
-      "id": "redhat.vscode-xml",
-      "version": "latest"
+      "version": "latest",
+      "id": "github.remotehub"
     },
     {
-      "id": "ms-python.autopep8",
-      "version": "latest"
+      "version": "latest",
+      "id": "google.gemini-cli-vscode-ide-companion"
     },
     {
-      "id": "ms-python.black-formatter",
-      "version": "latest"
+      "version": "latest",
+      "id": "grapecity.gc-excelviewer"
     },
     {
-      "id": "yzhang.markdown-all-in-one",
-      "version": "latest"
+      "version": "latest",
+      "id": "gruntfuggly.todo-tree"
     },
     {
-      "id": "vscode-icons-team.vscode-icons",
-      "version": "latest"
+      "version": "latest",
+      "id": "hediet.vscode-drawio"
     },
     {
-      "id": "ms-vscode-remote.remote-ssh",
-      "version": "latest"
+      "version": "latest",
+      "id": "james-yu.latex-workshop"
     },
     {
-      "id": "ms-vscode-remote.remote-containers",
-      "version": "latest"
+      "version": "latest",
+      "id": "jeff-hykin.better-cpp-syntax"
     },
     {
-      "id": "mechatroner.rainbow-csv",
-      "version": "latest"
+      "version": "latest",
+      "id": "jock.svg"
     },
     {
-      "id": "ms-python.isort",
-      "version": "latest"
+      "version": "latest",
+      "id": "kevinrose.vsc-python-indent"
     },
     {
-      "id": "github.copilot",
-      "version": "latest"
+      "version": "latest",
+      "id": "mechatroner.rainbow-csv"
     },
     {
-      "id": "ms-python.debugpy",
-      "version": "latest"
+      "version": "latest",
+      "id": "mikestead.dotenv"
     },
     {
-      "id": "ms-kubernetes-tools.vscode-kubernetes-tools",
-      "version": "latest"
+      "version": "latest",
+      "id": "mongodb.mongodb-vscode"
     },
     {
-      "id": "mtxr.sqltools",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-azuretools.vscode-containers"
     },
     {
-      "id": "ms-python.vscode-pylance",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-azuretools.vscode-docker"
     },
     {
-      "id": "ms-vscode.cpptools",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-kubernetes-tools.vscode-kubernetes-tools"
     },
     {
-      "id": "ms-vscode.remote-explorer",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.autopep8"
     },
     {
-      "id": "ms-vscode.remote-server",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.black-formatter"
     },
     {
-      "id": "ms-toolsai.jupyter-renderers",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.debugpy"
     },
     {
-      "id": "ms-python.python",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.isort"
     },
     {
-      "id": "jock.svg",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.pylint"
     },
     {
-      "id": "ms-toolsai.jupyter",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.python"
     },
     {
-      "id": "eamodio.gitlens",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.vscode-pylance"
     },
     {
-      "id": "github.copilot-chat",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-python.vscode-python-envs"
     },
     {
-      "id": "mtxr.sqltools-driver-mysql",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-toolsai.jupyter"
     },
     {
-      "id": "esbenp.prettier-vscode",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-toolsai.jupyter-keymap"
     },
     {
-      "id": "christian-kohler.path-intellisense",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-toolsai.jupyter-renderers"
     },
     {
-      "id": "jeff-hykin.better-cpp-syntax",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-toolsai.vscode-jupyter-cell-tags"
     },
     {
-      "id": "ms-vscode.powershell",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-toolsai.vscode-jupyter-slideshow"
     },
     {
-      "id": "cschlosser.doxdocgen",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode-remote.remote-containers"
     },
     {
-      "id": "dotjoshjohnson.xml",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode-remote.remote-ssh"
     },
     {
-      "id": "continue.continue",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode-remote.remote-ssh-edit"
     },
     {
-      "id": "rooveterinaryinc.roo-cline",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode-remote.remote-wsl"
     },
     {
-      "id": "wayou.vscode-todo-highlight",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode-remote.vscode-remote-extensionpack"
     },
     {
-      "id": "james-yu.latex-workshop",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.azure-repos"
     },
     {
-      "id": "tecosaur.latex-utilities",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.cmake-tools"
     },
     {
-      "id": "augment.vscode-augment",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.cpptools"
     },
     {
-      "id": "bierner.markdown-checkbox",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.cpptools-extension-pack"
     },
     {
-      "id": "bierner.markdown-emoji",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.cpptools-themes"
     },
     {
-      "id": "bierner.markdown-mermaid",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.hexeditor"
     },
     {
-      "id": "bierner.markdown-preview-github-styles",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.live-server"
     },
     {
-      "id": "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.makefile-tools"
     },
     {
-      "id": "charliermarsh.ruff",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.powershell"
     },
     {
-      "id": "docker.docker",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.remote-explorer"
     },
     {
-      "id": "ms-azuretools.vscode-containers",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.remote-repositories"
     },
     {
-      "id": "shd101wyy.markdown-preview-enhanced",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vscode.remote-server"
     },
     {
-      "id": "yzane.markdown-pdf",
-      "version": "latest"
+      "version": "latest",
+      "id": "ms-vsliveshare.vsliveshare"
+    },
+    {
+      "version": "latest",
+      "id": "mtxr.sqltools"
+    },
+    {
+      "version": "latest",
+      "id": "mtxr.sqltools-driver-mysql"
+    },
+    {
+      "version": "latest",
+      "id": "njpwerner.autodocstring"
+    },
+    {
+      "version": "latest",
+      "id": "openai.chatgpt"
+    },
+    {
+      "version": "latest",
+      "id": "pkief.material-icon-theme"
+    },
+    {
+      "version": "latest",
+      "id": "qwtel.sqlite-viewer"
+    },
+    {
+      "version": "latest",
+      "id": "redhat.vscode-xml"
+    },
+    {
+      "version": "latest",
+      "id": "redhat.vscode-yaml"
+    },
+    {
+      "version": "latest",
+      "id": "rooveterinaryinc.roo-cline"
+    },
+    {
+      "version": "latest",
+      "id": "samuelcolvin.jinjahtml"
+    },
+    {
+      "version": "latest",
+      "id": "shd101wyy.markdown-preview-enhanced"
+    },
+    {
+      "version": "latest",
+      "id": "tamasfe.even-better-toml"
+    },
+    {
+      "version": "latest",
+      "id": "tecosaur.latex-utilities"
+    },
+    {
+      "version": "latest",
+      "id": "tomoki1207.pdf"
+    },
+    {
+      "version": "latest",
+      "id": "vscode-icons-team.vscode-icons"
+    },
+    {
+      "version": "latest",
+      "id": "vscodevim.vim"
+    },
+    {
+      "version": "latest",
+      "id": "vstirbu.vscode-mermaid-preview"
+    },
+    {
+      "version": "latest",
+      "id": "waderyan.gitblame"
+    },
+    {
+      "version": "latest",
+      "id": "wakatime.vscode-wakatime"
+    },
+    {
+      "version": "latest",
+      "id": "wayou.vscode-todo-highlight"
+    },
+    {
+      "version": "latest",
+      "id": "wholroyd.jinja"
+    },
+    {
+      "version": "latest",
+      "id": "yzane.markdown-pdf"
+    },
+    {
+      "version": "latest",
+      "id": "yzhang.markdown-all-in-one"
+    },
+    {
+      "version": "latest",
+      "id": "zhikui.vscode-openfoam"
     }
   ]
 }
